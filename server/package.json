@@ -1,0 +1,29 @@
+{
+  "name": "matcha",
+  "version": "1.0.0",
+  "description": "Server-side functionality for Matcha app",
+  "scripts": {
+    "test": "ts-mocha src/tests.ts",
+    "start": "ts-node src/index.ts"
+  },
+  "author": "Chris Choi",
+  "license": "ISC",
+  "dependencies": {
+    "agora-access-token": "^2.0.4",
+    "apn": "^2.2.0",
+    "axios": "^1.4.0",
+    "date-fns": "^2.30.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "firebase-admin": "^11.10.1",
+    "node-cron": "^3.0.2",
+    "pm2": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.1",
+    "@types/node-cron": "^3.0.8",
+    "node-mocks-http": "^1.12.2",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^5.1.6"
+  }
+}
