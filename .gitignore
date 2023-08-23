@@ -1,0 +1,14 @@
+# Ignore .env files
+.env
+
+# Ignore .p8 files
+*.p8
+
+# Ignore .pem files
+*.pem
+
+# Ignore Firebase service account files
+*firebase-adminsdk*.json
+
+# Ignore modules
+node_modules/

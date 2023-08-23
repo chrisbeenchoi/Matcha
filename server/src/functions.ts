@@ -29,6 +29,10 @@ const db = admin.database();
 // - notifications scheduled
 // - matching scheduled
 export async function setCallTime() {
+  // 0. clear matchpool of potential leftovers
+  const pool = db.ref('matchPool');
+  pool.remove();
+
   // 1. check if calltime currently exists + is valid. otherwise set a valid call time 
   const callTimeRef = db.ref('callTime')
 
@@ -76,7 +80,7 @@ export async function setCallTime() {
   } 
   callTimeRef.set(format(callTime, 'yyyy-MM-dd HH:mm:ss'));
 
-  // 2. if value set start counter + group users in groups of like, 50? less?
+  // 2. if value set start counter + group users in groups of like, 100? less?
   console.log("SCHEDULING USER CALL TIMES STARTING AT: ", callTime);
 
   let uids: string[] = [];
@@ -90,7 +94,7 @@ export async function setCallTime() {
   });
 
   let userCount: number = 0;
-  const groupCap: number = 100; //to avoid too many concurrent users. limit is 100.
+  const groupCap: number = 100; //to avoid too many concurrent users. limit is 100. drop if performance affected
 
   // want to batch these notifs later.
   //let deviceTokens: string[] = [];
@@ -105,7 +109,7 @@ export async function setCallTime() {
   await uids.forEach(uid => {
     let userCallTimeRef = users.child(uid).child("callTime");
     let userMatchInfoRef = users.child(uid).child("matchInfo");
-    userMatchInfoRef.remove(); //test this portion!!!!
+    userMatchInfoRef.remove();
 
     let dtRef = users.child(uid).child("deviceToken");
     dtRef.once('value', (snapshot) => {
@@ -138,11 +142,12 @@ export async function setCallTime() {
   console.log("DONE PROCESSING USERS");
 
   // schedule necessary server functions to run continuously through active interval
+  // make this window smaller. a lot of shit going on.
   console.log("preparing active window");
   let startTime = new Date(callTime); //decrement?
   let endTime = new Date(callTime);
   endTime.setMinutes(callTime.getMinutes() + 2 * (userCount/groupCap + 1));
-  const cronExpression = `* * ${startTime.getHours()}-${Math.max(23, startTime.getHours()+1)} ${startTime.getDate()} ${startTime.getMonth() + 1} *`;
+  const cronExpression = `* * ${startTime.getHours()}-${Math.min(23, startTime.getHours()+1)} ${startTime.getDate()} ${startTime.getMonth() + 1} *`;
   cron.schedule(cronExpression, () => {
     matchUsers();
   });
@@ -198,7 +203,7 @@ export async function matchUsers() {
       const users = db.ref('users');
 
       // use this as unique channel name
-      const matchid = uid1+uid2 //right at 64 byte limit
+      const matchid = uid1+uid2 // right at 64 byte limit
       
       // request tokens from server --> update user nodes
       let url1 = 'http://44.224.156.71:8080/rtc/' + matchid + '/1';

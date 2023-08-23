@@ -23,22 +23,11 @@ struct CallView: View {
     //turn time left into a state variable to make ui update reactively?
     private let countdown = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
-    func leaveChannel() {
-        self.joined = false
-        self.channel = ""
-        self.token = ""
-        self.channelUid = 0
-        callScreen = nil
-    }
-    
     func joinChannel() {
-        channel = ""
-        token = ""
-        channelUid = 0
-        
-        var channelFetched = false
-        var tokenFetched = false
-        var channelUidFetched = false
+        // refetch by default?
+        var channelFetched = false //(channel == "")
+        var tokenFetched = false //(token == "")
+        var channelUidFetched = false //(channelUid == 0)
         
         func checkCompletion() {
             if channelFetched && tokenFetched && channelUidFetched {
@@ -111,8 +100,6 @@ struct CallView: View {
     }
     
     var body: some View {
-        
-        
         ZStack {
             if (loading) {
                 ProgressView()
@@ -130,7 +117,7 @@ struct CallView: View {
                         }
                     }
                     .font(.system(size: 80, weight: .bold))
-                    .padding(.top, 50) //adjust if too high/low
+                    .padding(.top, 50)
                 
                 Spacer()
             }
@@ -150,31 +137,32 @@ struct CallView: View {
                         .foregroundColor(.white)
                         .background(Color.red)
                         .cornerRadius(10)
-                        .padding(.bottom, 60)
+                        .padding(.bottom, 45)
                     }
                     
                     callScreen
                         .frame(width: 300, height: 500)
                         .cornerRadius(30)
+                        .padding(.top, 15)
                 }
             }
             if !joined {
                 VStack {
                     Text("CURRENT TIME: MATCH O'CLOCK 🍵")
                     
-                    // make sure you can't press more than once because that would be disasterous lowkey
-                    // make app unresponsive with spinny wheel, because logging out here causes app to crash (cannot fetch channel +token when uid = "". may need another boolean state var to keep track of this middle state
                     Button("Join") {
-                        if (self.channel != "" && self.token != "" && self.channelUid != 0) {
-                            self.joinChannel()
-                        } else if (!loading) {
+                        if (!loading) {
                             loading = true
-                            DatabaseManager.shared.matchPrep(uid: contentViewModel.uid) { success in
-                                if success {
-                                    print("SUCCESS.")
-                                    self.joinChannel()
-                                } else {
-                                    print("FAILED TO JOIN MATCH POOL") ///alert user to try again? probably.
+                            if (self.channel != "" && self.token != "" && self.channelUid != 0) {
+                                self.joinChannel()
+                            } else {
+                                DatabaseManager.shared.matchPrep(uid: contentViewModel.uid) { success in
+                                    if success {
+                                        print("SUCCESS.")
+                                        self.joinChannel()
+                                    } else {
+                                        print("FAILED TO JOIN MATCH POOL") ///alert user to try again? probably should
+                                    }
                                 }
                             }
                         }

@@ -31,8 +31,6 @@ struct MatchaApp: App {
         }
     }
     
-    // some things (2) about this must be in the main thread.
-    // wrap everything in dispatchqueue.main bruh idk
     func configureFirebase() {
         print("STARTING TO CONFIGURE FIREBASE...")
         
@@ -48,18 +46,15 @@ struct MatchaApp: App {
                 do {
                     let decoder = JSONDecoder()
                     let config = try decoder.decode(FirebaseConfig.self, from: data)
-                    print(config)
                     let options = FirebaseOptions(googleAppID: config.appID, gcmSenderID: config.senderID)
                     options.apiKey = config.apiKey
                     options.projectID = config.projectID
                     options.databaseURL = "https://matcha-5f2b0-default-rtdb.firebaseio.com"
-                    FirebaseApp.configure(options: options)
                     DispatchQueue.main.async {
-                        print("TURNING CONFIGURED TRUE")
+                        FirebaseApp.configure(options: options)
                         ConfigureState.shared.configured = true
-                        print("configured:", ConfigureState.shared.configured)
+                        print("app configured:", ConfigureState.shared.configured)
                     }
-                    print("app configured.")
                 } catch {
                     print("JSON decoding or Firebase configuration error: \(error)")
                 }
