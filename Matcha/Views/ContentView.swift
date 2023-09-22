@@ -15,23 +15,36 @@ struct ContentView: View {
     @State var profile: Bool = false
     @State var tokenSet: Bool = false
     
+    @State var postCallTriggered: Bool = false
+    
     var body: some View {
-        // all false: view with login / register options
-        // login true, rest false: login view
-        // register true, rest false: register view:
-        // loggedin true: the regular app and whatnot
         if contentViewModel.loggedIn {
             ZStack {
                 // content: home or profile
                 if (home && !profile) {
-                    // CALL TIME...!!!
-                    if (currTime >= contentViewModel.callTime &&
+                    if (contentViewModel.homeOverride) {
+                        AppHomeView().environmentObject(contentViewModel)
+                            .onAppear {
+                                startTimer()
+                                contentViewModel.updateCallTime()
+                            }
+                    } else if (contentViewModel.reporting) {
+                        ReportView().environmentObject(contentViewModel)
+                    } else if (currTime >= contentViewModel.callTime &&
                         currTime <= contentViewModel.callTime.addingTimeInterval(2 * 60)) {
                         CallView().environmentObject(contentViewModel)
                             .onAppear {
                                 startTimer()
                                 contentViewModel.updateCallTime()
-                                
+                            }
+                    } else if (contentViewModel.postCall && (contentViewModel.adClicked ||
+                               (currTime >= contentViewModel.callTime.addingTimeInterval(2 * 60) &&
+                                currTime <= contentViewModel.callTime.addingTimeInterval(2 * 60 + 15)))) {
+                        PostCallView().environmentObject(contentViewModel)
+                            .onAppear {
+                                contentViewModel.rewardAd.loadAd()
+                                startTimer()
+                                contentViewModel.updateCallTime()
                             }
                     } else {
                         AppHomeView().environmentObject(contentViewModel)
@@ -79,6 +92,9 @@ struct ContentView: View {
                     }
                 }
             }
+            //.sheet(isPresented: $postCall) {
+            //    PostCallAlert(matchUid: "", isPresented: $postCall)
+            //}
         } else {
             // not logged in.
             if contentViewModel.loggingIn {
@@ -119,6 +135,9 @@ struct ContentView: View {
                     
                     RegistrationView().environmentObject(contentViewModel)
                 }
+            } else if contentViewModel.profiling { //TODO: store profiling status somewhere (keychain? database? top level? to pop this up anytime it's not done
+                ProfileCreationView()
+                    .environmentObject(contentViewModel)
             } else {
                 StartView().environmentObject(contentViewModel)
                     .onAppear() {
@@ -129,12 +148,23 @@ struct ContentView: View {
         }
     }
     
-    
-    // need to pause this too, when you log out or something. .invalidate
-    // anyway this constantly listens for changes in calltime because it's a very important feature of the app
+    //could definitely fetch calltime less frequently.
     private func startTimer() {
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             currTime = Date()
+            
+            if (contentViewModel.homeOverride && currTime >= contentViewModel.callTime.addingTimeInterval(135)) {
+                contentViewModel.homeOverride = false
+            }
+            
+            if (currTime >= contentViewModel.callTime.addingTimeInterval(2 * 60) &&
+                currTime <= contentViewModel.callTime.addingTimeInterval(2 * 60 + 10) &&
+                !postCallTriggered && !contentViewModel.postCall) {
+                contentViewModel.postCall = true
+                postCallTriggered = true
+            }
+            
+            // put a condition on this?
             contentViewModel.updateCallTime()
             if (!tokenSet) {
                 if (globalDeviceToken != "") {
@@ -144,6 +174,7 @@ struct ContentView: View {
                             tokenSet = true
                         } else {
                             print("THE DEVICE TOKEN HAS NOT BEEN SET UH OH!")
+                            tokenSet = false
                         }
                     }
                 }

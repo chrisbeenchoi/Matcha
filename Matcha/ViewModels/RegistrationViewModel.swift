@@ -17,19 +17,13 @@ struct AlertItem: Identifiable {
 }
 
 class RegistrationViewModel: ObservableObject {
-    @Published var firstName: String = ""
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var alertItem: AlertItem?
+    @Published var eulaChecked: Bool = false
     
     // Registers user to database, returns whether it succeeded
     func registerUser(completion: @escaping (String?) -> Void) {
-        // Check if first name empty
-        if firstName == "" {
-            alertItem = AlertItem(title: "Invalid display name!", message: "Please enter your first name!")
-            completion(nil)
-            return
-        }
         
         // Check if email address valid
         if !isValidEmail(email: email) {
@@ -45,6 +39,12 @@ class RegistrationViewModel: ObservableObject {
             return
         }
         
+        if !eulaChecked {
+            alertItem = AlertItem(title: "EULA unchecked!", message: "To register, please agree to the end-user license agreement!")
+            completion(nil)
+            return
+        }
+        
         let encrypted = encryptPassword(password)
         if let pw = encrypted {
             Auth.auth().createUser(withEmail: email, password: pw) { (authResult, error) in
@@ -56,7 +56,7 @@ class RegistrationViewModel: ObservableObject {
                     completion(nil)
                 } else if let user = authResult?.user {
                     let uid = user.uid
-                    DatabaseManager.shared.addUser(uid: uid, firstName: self.firstName) { success in
+                    DatabaseManager.shared.addUser(uid: uid) { success in
                         if success {
                             print("SUCCESS.")
                             completion(uid)

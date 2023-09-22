@@ -11,6 +11,12 @@ import AgoraUIKit
 // separate functions out into callviewmodel?
 struct CallView: View {
     @EnvironmentObject var contentViewModel: ContentViewModel
+    @State var matched: Bool = false   //toggle matched instead of joined once server side matching occurs --> pop alert/view --> toggle joined
+    // this is the variable that controls the .alert(isPresented:) for MatchAlert
+    @State var accepted: Bool = false
+    @State var blocked: Bool = false
+    
+    @State var matchUid: String = ""
     @State var joined: Bool = false
     @State var loading: Bool = false
     
@@ -20,7 +26,6 @@ struct CallView: View {
     
     @State var callScreen: AgoraVideoViewerWrapper? = nil
     
-    //turn time left into a state variable to make ui update reactively?
     private let countdown = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     func joinChannel() {
@@ -28,15 +33,15 @@ struct CallView: View {
         var channelFetched = false //(channel == "")
         var tokenFetched = false //(token == "")
         var channelUidFetched = false //(channelUid == 0)
+        var matchUidFetched = false
         
         func checkCompletion() {
-            if channelFetched && tokenFetched && channelUidFetched {
+            if channelFetched && tokenFetched && channelUidFetched && matchUidFetched {
                 print(self.channel)
                 print(self.token)
                 print(self.channelUid)
                 loading = false
-                self.joined = true
-                self.callScreen = AgoraVideoViewerWrapper(channel: self.channel, token: self.token, uid: self.channelUid, endTime: contentViewModel.callTime.addingTimeInterval(119))
+                matched = true
             }
         }
         
@@ -85,9 +90,26 @@ struct CallView: View {
             }
         }
         
+        func fetchMatchUid() {
+            DatabaseManager.shared.getMatchUid(uid: contentViewModel.uid) { match in
+                if let match = match {
+                    self.matchUid = match
+                    matchUidFetched = true
+                    checkCompletion()
+                } else {
+                    // Match UID not found, wait and retry
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        fetchMatchUid()
+                    }
+                }
+            }
+            
+        }
+        
         fetchChannel()
         fetchToken()
         fetchChannelUid()
+        fetchMatchUid()
     }
     
     private func timeString(_ seconds: Int) -> String {
@@ -110,6 +132,7 @@ struct CallView: View {
                 Text(timeString(120 - Int(Date().timeIntervalSince(contentViewModel.callTime).rounded())))
                     .onReceive(countdown) { _ in
                         if 120 - Int(Date().timeIntervalSince(contentViewModel.callTime).rounded()) <= 0 {
+                            callScreen?.endCall()
                             self.joined = false
                             self.channel = ""
                             self.token = ""
@@ -124,14 +147,28 @@ struct CallView: View {
             
             if joined {
                 ZStack {
+                    VStack {
+                        HStack {
+                            Button(action: {
+                                print("user block / report selected")
+                                blocked = true
+                            }) {
+                                Image(systemName: "person.crop.circle.badge.xmark.fill")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                    .foregroundColor(Color.gray)
+                                    .padding()
+                            }
+                            Spacer()
+                        }
+                        Spacer()
+                    }
                     
                     VStack {
                         Spacer()
                         Button("Leave") {
-                            // you can rejoin the same call but not a new one
                             joined = false
                             callScreen?.endCall()
-                            
                         }
                         .padding()
                         .foregroundColor(.white)
@@ -153,7 +190,8 @@ struct CallView: View {
                     Button("Join") {
                         if (!loading) {
                             loading = true
-                            if (self.channel != "" && self.token != "" && self.channelUid != 0) {
+                            if (self.channel != "" && self.token != "" && self.channelUid != 0 && matchUid != "") {
+                                // rejoin case - preexisting credentials
                                 self.joinChannel()
                             } else {
                                 DatabaseManager.shared.matchPrep(uid: contentViewModel.uid) { success in
@@ -173,6 +211,39 @@ struct CallView: View {
                     .cornerRadius(10)
                 }
                 .padding(.bottom, 120)
+            }
+        }
+        .sheet(isPresented: $matched) {
+            MatchAlert(matchUid: self.matchUid, isPresented: $matched, accepted: $accepted, blocked: $blocked)
+        }
+        .onChange(of: blocked) { block in
+            if joined {
+                callScreen?.endCall()
+                self.joined = false
+                
+            }
+            
+            // ReportAlert(matchUid: self.matchUid, callFinished: false, isPresented: $blocked)  // no longer using this
+            if block {
+                contentViewModel.reporting = true
+            }
+        }
+        .onChange(of: accepted) { pickedUp in
+            if pickedUp {
+                self.joined = true
+                self.callScreen = AgoraVideoViewerWrapper(channel: self.channel, token: self.token, uid: self.channelUid, endTime: contentViewModel.callTime.addingTimeInterval(119))
+            }
+        }
+        .onChange(of: blocked) { blocked in
+            print("BLOCK METHOD TRIGGERED")
+            if blocked {
+                DatabaseManager.shared.blockUser(blocker: contentViewModel.uid, blocked: matchUid) { success in
+                    if success {
+                        print("BLOCK SUCCESSFUL")
+                    } else {
+                        print("NOT ADDED TO BLOCK LIST")
+                    }
+                }
             }
         }
     }

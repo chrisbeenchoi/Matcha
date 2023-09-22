@@ -54,7 +54,7 @@ struct LoginView: View {
         }
         .padding(.bottom, 75)
         .alert(item: $loginViewModel.alertItem) { alertItem in
-            Alert(title: Text(alertItem.title), message: Text(alertItem.message), dismissButton: .default(Text("Yes")))
+            Alert(title: Text(alertItem.title), message: Text(alertItem.message), dismissButton: .default(Text("OK")))
         }
     }
 }

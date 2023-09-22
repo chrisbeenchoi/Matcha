@@ -14,7 +14,9 @@ class ProfileViewModel: ObservableObject {
     @Published var bio: String = ""
     @Published var ig: String = ""
     @Published var snap: String = ""
+    @Published var phoneNumber: String = ""
     @Published var alertItem: AlertItem?
+    @Published var profileImage: UIImage?
     
     func fetchProfile(uid: String) {
         DatabaseManager.shared.getFirstName(uid: uid) { name in
@@ -45,11 +47,24 @@ class ProfileViewModel: ObservableObject {
                 self.snap = ""
             }
         }
+        DatabaseManager.shared.fetchPfp(uid: uid) { url in
+            if let url = url {
+                URLSession.shared.dataTask(with: url) { data, response, error in
+                        if let data = data, let image = UIImage(data: data) {
+                            DispatchQueue.main.async {
+                                self.profileImage = image
+                            }
+                        }
+                }.resume()
+            } else {
+                self.profileImage = nil
+            }
+        }
     }
     
     // method to save everything by calling a database thing
     func saveProfile(uid: String, completion: @escaping (Bool) -> Void) {
-        DatabaseManager.shared.setProfile(uid: uid, firstName: self.firstName, bio: self.bio, ig: self.ig, snap: self.snap) { success in
+        DatabaseManager.shared.setProfile(uid: uid, firstName: self.firstName, bio: self.bio, ig: self.ig, snap: self.snap, phoneNumber: self.phoneNumber) { success in
             if success {
                 print("PROFILE SAVE SUCCESS.")
                 completion(true)
@@ -64,6 +79,13 @@ class ProfileViewModel: ObservableObject {
         alertItem = AlertItem(
             title: "REALLY⁉️",
             message: "Account deletion is permanent."
+        )
+    }
+    
+    func failedDelete() {
+        alertItem = AlertItem(
+            title: "Failed to delete account - expired login",
+            message: "Log out and log in again to try again"
         )
     }
 }

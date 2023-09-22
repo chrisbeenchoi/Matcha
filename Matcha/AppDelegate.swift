@@ -7,11 +7,14 @@
 
 import Foundation
 import UIKit
+import GoogleMobileAds
 
 class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         //_ = Auth.auth() //unsure if this one is needed
         UNUserNotificationCenter.current().delegate = self
+        
+        //GADMobileAds.sharedInstance().start(completionHandler: nil)
         
         // check if granted already or not. not needed EVERY TIME (though it does not hurt)
         requestNotificationPermission()

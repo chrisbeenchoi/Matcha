@@ -2,6 +2,7 @@ import express from 'express';
 import { RtcTokenBuilder, RtcRole } from 'agora-access-token';
 import dotenv from 'dotenv';
 import { Request, Response } from "express";
+import { setCallTime } from './functions'
 
 dotenv.config();
 const appId = process.env.APP_ID;
@@ -56,6 +57,7 @@ export async function generateRTCToken(req: Request, res: Response) {
     res.status(200).send({ 'rtcToken': token });
 };
 
+// Sends credentials to configure client with Firebase
 export async function getFirebaseCreds(req: Request, res: Response) {
     const firebaseConfig = {
         appID: process.env.FIREBASE_APP_ID,
@@ -65,4 +67,10 @@ export async function getFirebaseCreds(req: Request, res: Response) {
     };
 
     res.status(200).send(firebaseConfig);
+}
+
+// Sets Match o'clock to current moment
+export async function matchOClock(req: Request, res: Response) {
+    setCallTime(true);
+    res.status(200).send("CALL TIME SET");
 }

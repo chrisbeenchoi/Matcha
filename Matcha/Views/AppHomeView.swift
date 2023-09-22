@@ -13,8 +13,6 @@ import UserNotifications
 struct AppHomeView: View {
     @EnvironmentObject var contentViewModel: ContentViewModel
     
-    var uid: String = ""
-    
     var body: some View {
         VStack {
             VStack {
@@ -26,6 +24,32 @@ struct AppHomeView: View {
                     .padding()
                 
                 Text("CURRENT TIME: NOT MATCH O'CLOCK ☕")
+                
+                if (contentViewModel.uid == "isM1hfTO2ggkbkDa3gUEiCUNnnD2") {
+                    Button("MAKE IT MATCH O'CLOCK 🍵") {
+                        print("BUTTON PRESSED")
+                        
+                        guard let url = URL(string: "http://44.224.156.71:8080/match/now") else {
+                            print("INVALID URL")
+                            return
+                        }
+                        
+                        var request = URLRequest(url: url)
+                        request.httpMethod = "POST"
+                        request.setValue("application/json", forHTTPHeaderField: "Content-Type") //needed?
+                        // maybe pass in UID and check on server side.
+                        
+                        URLSession.shared.dataTask(with: request) { _, response, _ in
+                            if let response = response {
+                                print("CALL TIME SET TO NOW SUCCESSFULLY IF 200: ", response)
+                            }
+                        }.resume()
+                    }
+                    .padding()
+                    .foregroundColor(.white)
+                    .background(Color("matcha"))
+                    .cornerRadius(10)
+                }
             }
             .padding(.bottom, 100)
         }

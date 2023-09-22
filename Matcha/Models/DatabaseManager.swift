@@ -7,19 +7,31 @@
 
 import Foundation
 import Firebase
+import FirebaseStorage
+import SwiftUI
 
 class DatabaseManager {
     static let shared = DatabaseManager()
     private let database = Database.database().reference()
+    let storage = Storage.storage().reference()
+    let serverTimeZone = TimeZone(identifier: "America/Los_Angeles")
+    let deviceTimeZone = TimeZone.current
     
+    // need to convert from pacific time --> device time to correctly trigger UI changes
     func getCallTime(uid: String, completion: @escaping (Date?) -> Void) {
         let time = database.child("users").child(uid).child("callTime")
         time.observeSingleEvent(of: .value) { snapshot in
             if let timeString = snapshot.value as? String {
+                
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                if let time = dateFormatter.date(from: timeString) {
-                    completion(time)
+                
+                if let serverTime = dateFormatter.date(from: timeString) {
+                    //converts time from pacific time to device time
+                    let currentDate = Date()
+                    let offset1 = self.serverTimeZone!.secondsFromGMT(for: currentDate)
+                    let offset2 = self.deviceTimeZone.secondsFromGMT(for: currentDate)
+                    completion(serverTime.addingTimeInterval(TimeInterval(offset2-offset1)))
                 } else {
                     print("Invalid date format")
                     completion(nil)
@@ -31,11 +43,12 @@ class DatabaseManager {
         }
     }
     
-    func addUser(uid: String, firstName: String, completion: @escaping (Bool) -> Void) {
+    func addUser(uid: String, completion: @escaping (Bool) -> Void) {
         let userRef = database.child("users").child(uid)
         let userData = [
-            "firstName": firstName,
-            "callTime": nil
+            "firstName": "",
+            "callTime": nil  //TODO: keep a value in database to fetch at initialization so user can use starting on first day. track # of people in latest group, increment as needed
+            // Do this fast. this is essential to the user experience.
         ]
         
         userRef.setValue(userData) { (error, databaseRef) in
@@ -108,13 +121,17 @@ class DatabaseManager {
     
     // PROFILE METHODS:
     // write profile to database, all info under profile node. NEEDS first name
-    func setProfile(uid: String, firstName: String, bio: String?, ig: String?, snap: String?, completion: @escaping (Bool) -> Void) {
+    func setProfile(uid: String, firstName: String, bio: String?, ig: String?, snap: String?, phoneNumber: String?, completion: @escaping (Bool) -> Void) {
         let userRef = database.child("users").child(uid)
         let profileRef = userRef.child("profile")
+        
+        // unsure how well this will work with the nil values but let us just try..
         let profileData = [
+            "firstName": firstName,
             "bio": bio,
             "ig": ig,
-            "snap": snap
+            "snap": snap,
+            "phoneNumber": phoneNumber
         ]
         
         profileRef.setValue(profileData) { (error, databaseRef) in
@@ -123,15 +140,7 @@ class DatabaseManager {
                 completion(false)
             } else {
                 print("Profile set successfully")
-                let nameRef = userRef.child("firstName")
-                nameRef.setValue(firstName) { (error, databaseRef) in
-                    if let error = error {
-                        print("Error writing to database: \(error.localizedDescription)")
-                        completion(false)
-                    } else {
-                        completion(true)
-                    }
-                }
+                completion(true)
             }
         }
     }
@@ -139,7 +148,7 @@ class DatabaseManager {
     
     // get first name
     func getFirstName(uid: String, completion: @escaping (String?) -> Void) {
-        let firstName = database.child("users").child(uid).child("firstName")
+        let firstName = database.child("users").child(uid).child("profile").child("firstName")
         firstName.observeSingleEvent(of: .value) { snapshot in
             if let firstName = snapshot.value as? String {
                 print("firstName: \(firstName)")
@@ -193,8 +202,115 @@ class DatabaseManager {
         }
     }
     
-    // profile pic would def help. the social mediafication of this app is gonna be real difficult
+    // get phone number
+    func getDigits(uid: String, completion: @escaping (String?) -> Void) {
+        let digits = database.child("users").child(uid).child("profile").child("phoneNumber")
+        digits.observeSingleEvent(of: .value) { snapshot in
+            if let digits = snapshot.value as? String {
+                print("digits: \(digits)")
+                completion(digits)
+            } else {
+                print("NO SNAP YET...!")
+                completion(nil)
+            }
+        }
+    }
     
+    func uploadPfp(uid: String, pfp: UIImage, completion: @escaping (Bool) -> Void) {
+        let pfpRef = storage.child("pfps").child("\(uid).jpg")
+        if let imageData = pfp.jpegData(compressionQuality: 0.8) {
+            pfpRef.putData(imageData, metadata: nil) { metadata, error in
+                if let error = error {
+                    print("Error uploading profile image: \(error.localizedDescription)")
+                    completion(false)
+                } else {
+                    completion(true)
+                }
+            }
+        }
+    }
+    
+    func fetchPfp(uid: String, completion: @escaping (URL?) -> Void) {
+        let pfpRef = storage.child("pfps").child("\(uid).jpg")
+        pfpRef.downloadURL { url, error in
+            if let url = url {
+                print(url)
+                completion(url)
+            } else if let error = error {
+                print(error)
+                completion(nil)
+            }
+        }
+    }
+    
+    func getMatchUid(uid: String, completion: @escaping (String?) -> Void) {
+        let matchRef = database.child("users").child(uid).child("matchInfo").child("match")
+        matchRef.observeSingleEvent(of: .value) { snapshot in
+            if let match = snapshot.value as? String {
+                print("match uid: \(match)")
+                completion(match)
+            } else {
+                print("NO MATCH YET...!")
+                completion(nil)
+            }
+        }
+    }
+    
+    func blockUser(blocker: String, blocked: String, completion: @escaping (Bool) -> Void) {
+        let blockListRef = database.child("users").child(blocker).child("blocked").child(blocked)
+        blockListRef.setValue(blocked) { (error, databaseRef) in
+            if let error = error {
+                print("Error writing to database: \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("User successfully written to block list", blocked)
+                completion(true)
+            }
+        }
+    }
+    
+    func unblockUser(blocker: String, blocked: String, completion: @escaping (Bool) -> Void) {
+        let blockListRef = database.child("users").child(blocker).child("blocked").child(blocked)
+        blockListRef.removeValue() { (error, _) in
+            if let error = error {
+                print("Error writing to database: \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("User successfully unblocked", blocked)
+                completion(true)
+            }
+        }
+    }
+    
+    func reportUser(reporter: String, reported: String, violations: [Violation], description: String, completion: @escaping (Bool) -> Void) {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let formattedDate = dateFormatter.string(from: Date())
+        
+        var reasons: String = ""
+        violations.forEach { violation in
+            reasons = reasons + violation.name + " "
+        }
+        
+        let reportData = [
+            "timeStamp": formattedDate,
+            "reported": reported,
+            "violations": reasons,
+            "description": description
+        ]
+        
+        let reportRef = database.child("reports").child(formattedDate + ": " + reported)
+        reportRef.setValue(reportData) { (error, databaseRef) in
+            if let error = error {
+                print("Error writing to database: \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("REPORTED TO DATABASE")
+                completion(true)
+            }
+        }
+        
+    }
     
     func setDeviceToken(uid: String, completion: @escaping (Bool) -> Void) {
         let dtRef = database.child("users").child(uid).child("deviceToken")

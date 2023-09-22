@@ -50,6 +50,7 @@ struct MatchaApp: App {
                     options.apiKey = config.apiKey
                     options.projectID = config.projectID
                     options.databaseURL = "https://matcha-5f2b0-default-rtdb.firebaseio.com"
+                    options.storageBucket = "matcha-5f2b0.appspot.com"
                     DispatchQueue.main.async {
                         FirebaseApp.configure(options: options)
                         ConfigureState.shared.configured = true

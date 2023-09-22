@@ -23,8 +23,17 @@
 		765773C82A3D1153001FF6D7 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765773C72A3D1153001FF6D7 /* LoginViewModel.swift */; };
 		765773CA2A40F2C6001FF6D7 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765773C92A40F2C5001FF6D7 /* LoginView.swift */; };
 		765773CC2A40F2E2001FF6D7 /* StartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 765773CB2A40F2E2001FF6D7 /* StartView.swift */; };
-		765D6BA92A91640200D472FF /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 765D6BA82A91640200D472FF /* KeychainSwift */; };
+		767155902AB0D82C00D2B803 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 7671558F2AB0D82C00D2B803 /* GoogleMobileAds */; };
+		76880A3E2AB0FB5200FB049E /* AdCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76880A3D2AB0FB5200FB049E /* AdCoordinator.swift */; };
+		76880A402AB23C6700FB049E /* PostCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76880A3F2AB23C6700FB049E /* PostCallView.swift */; };
+		76880A422ABB770700FB049E /* ReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76880A412ABB770700FB049E /* ReportView.swift */; };
 		76B1B0862A478E6500AB103A /* AgoraUIKit in Frameworks */ = {isa = PBXBuildFile; productRef = 76B1B0852A478E6500AB103A /* AgoraUIKit */; };
+		76C620D92A9FD58D004FFCB5 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C620D82A9FD58D004FFCB5 /* ImagePicker.swift */; };
+		76C620DC2A9FDD41004FFCB5 /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = 76C620DB2A9FDD41004FFCB5 /* CropViewController */; };
+		76C620E12A9FE7B7004FFCB5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 76C620E02A9FE7B7004FFCB5 /* FirebaseStorage */; };
+		76C620E32AA14CBE004FFCB5 /* ProfileCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C620E22AA14CBE004FFCB5 /* ProfileCreationView.swift */; };
+		76C620E52AA14E3D004FFCB5 /* ProfileCreationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C620E42AA14E3D004FFCB5 /* ProfileCreationViewModel.swift */; };
+		76C620E72AA43121004FFCB5 /* MatchAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76C620E62AA43121004FFCB5 /* MatchAlert.swift */; };
 		76E7C2952A747FCB00A23064 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76E7C2942A747FCB00A23064 /* ProfileView.swift */; };
 		76E7C2972A76349700A23064 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76E7C2962A76349700A23064 /* ProfileViewModel.swift */; };
 		76E7C2A12A85768B00A23064 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76E7C2A02A85768B00A23064 /* AppDelegate.swift */; };
@@ -46,7 +55,14 @@
 		765773C92A40F2C5001FF6D7 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		765773CB2A40F2E2001FF6D7 /* StartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartView.swift; sourceTree = "<group>"; };
 		7677D11E2A85E2DC00D0D077 /* Matcha.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Matcha.entitlements; sourceTree = "<group>"; };
+		76880A3D2AB0FB5200FB049E /* AdCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdCoordinator.swift; sourceTree = "<group>"; };
+		76880A3F2AB23C6700FB049E /* PostCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostCallView.swift; sourceTree = "<group>"; };
+		76880A412ABB770700FB049E /* ReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportView.swift; sourceTree = "<group>"; };
 		76B1B0812A4668D600AB103A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		76C620D82A9FD58D004FFCB5 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		76C620E22AA14CBE004FFCB5 /* ProfileCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCreationView.swift; sourceTree = "<group>"; };
+		76C620E42AA14E3D004FFCB5 /* ProfileCreationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileCreationViewModel.swift; sourceTree = "<group>"; };
+		76C620E62AA43121004FFCB5 /* MatchAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchAlert.swift; sourceTree = "<group>"; };
 		76E7C2942A747FCB00A23064 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		76E7C2962A76349700A23064 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		76E7C2A02A85768B00A23064 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -59,9 +75,11 @@
 			files = (
 				765773B32A394B45001FF6D7 /* FirebaseDatabase in Frameworks */,
 				765773AF2A394B45001FF6D7 /* FirebaseAnalytics in Frameworks */,
-				765D6BA92A91640200D472FF /* KeychainSwift in Frameworks */,
 				76B1B0862A478E6500AB103A /* AgoraUIKit in Frameworks */,
+				76C620DC2A9FDD41004FFCB5 /* CropViewController in Frameworks */,
+				76C620E12A9FE7B7004FFCB5 /* FirebaseStorage in Frameworks */,
 				765773B12A394B45001FF6D7 /* FirebaseAuth in Frameworks */,
+				767155902AB0D82C00D2B803 /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,6 +91,7 @@
 			children = (
 				7657739C2A393E5D001FF6D7 /* Matcha */,
 				7657739B2A393E5D001FF6D7 /* Products */,
+				7671558E2AB0D82C00D2B803 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,6 +131,7 @@
 			children = (
 				765773BB2A3A5900001FF6D7 /* DatabaseManager.swift */,
 				760809E62A6F4C1E00B85990 /* AgoraVideoViewerWrapper.swift */,
+				76880A3D2AB0FB5200FB049E /* AdCoordinator.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -122,10 +142,15 @@
 				7657739F2A393E5D001FF6D7 /* ContentView.swift */,
 				765773CB2A40F2E2001FF6D7 /* StartView.swift */,
 				765773BD2A3A5A59001FF6D7 /* RegistrationView.swift */,
+				76C620E22AA14CBE004FFCB5 /* ProfileCreationView.swift */,
 				765773C92A40F2C5001FF6D7 /* LoginView.swift */,
 				760809E42A59CCD200B85990 /* AppHomeView.swift */,
 				765773C12A3BB7FB001FF6D7 /* CallView.swift */,
 				76E7C2942A747FCB00A23064 /* ProfileView.swift */,
+				76C620D82A9FD58D004FFCB5 /* ImagePicker.swift */,
+				76C620E62AA43121004FFCB5 /* MatchAlert.swift */,
+				76880A3F2AB23C6700FB049E /* PostCallView.swift */,
+				76880A412ABB770700FB049E /* ReportView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -137,8 +162,16 @@
 				765773B92A3A4BED001FF6D7 /* RegistrationViewModel.swift */,
 				765773C72A3D1153001FF6D7 /* LoginViewModel.swift */,
 				76E7C2962A76349700A23064 /* ProfileViewModel.swift */,
+				76C620E42AA14E3D004FFCB5 /* ProfileCreationViewModel.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		7671558E2AB0D82C00D2B803 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -162,7 +195,9 @@
 				765773B02A394B45001FF6D7 /* FirebaseAuth */,
 				765773B22A394B45001FF6D7 /* FirebaseDatabase */,
 				76B1B0852A478E6500AB103A /* AgoraUIKit */,
-				765D6BA82A91640200D472FF /* KeychainSwift */,
+				76C620DB2A9FDD41004FFCB5 /* CropViewController */,
+				76C620E02A9FE7B7004FFCB5 /* FirebaseStorage */,
+				7671558F2AB0D82C00D2B803 /* GoogleMobileAds */,
 			);
 			productName = Matcha;
 			productReference = 7657739A2A393E5D001FF6D7 /* Matcha.app */;
@@ -196,6 +231,8 @@
 				765773AD2A394B45001FF6D7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				76B1B0842A478E6500AB103A /* XCRemoteSwiftPackageReference "VideoUIKit-iOS" */,
 				765D6BA72A91640200D472FF /* XCRemoteSwiftPackageReference "keychain-swift" */,
+				76C620DA2A9FDD41004FFCB5 /* XCRemoteSwiftPackageReference "TOCropViewController" */,
+				76C620EA2AAFAB3C004FFCB5 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			productRefGroup = 7657739B2A393E5D001FF6D7 /* Products */;
 			projectDirPath = "";
@@ -226,15 +263,22 @@
 				765773CC2A40F2E2001FF6D7 /* StartView.swift in Sources */,
 				760809E52A59CCD200B85990 /* AppHomeView.swift in Sources */,
 				765773A02A393E5D001FF6D7 /* ContentView.swift in Sources */,
+				76C620E72AA43121004FFCB5 /* MatchAlert.swift in Sources */,
+				76880A422ABB770700FB049E /* ReportView.swift in Sources */,
 				765773BA2A3A4BED001FF6D7 /* RegistrationViewModel.swift in Sources */,
+				76C620E32AA14CBE004FFCB5 /* ProfileCreationView.swift in Sources */,
 				76E7C2952A747FCB00A23064 /* ProfileView.swift in Sources */,
+				76C620E52AA14E3D004FFCB5 /* ProfileCreationViewModel.swift in Sources */,
 				765773CA2A40F2C6001FF6D7 /* LoginView.swift in Sources */,
 				765773C42A3BBAC7001FF6D7 /* ContentViewModel.swift in Sources */,
+				76880A3E2AB0FB5200FB049E /* AdCoordinator.swift in Sources */,
+				76880A402AB23C6700FB049E /* PostCallView.swift in Sources */,
 				765773C82A3D1153001FF6D7 /* LoginViewModel.swift in Sources */,
 				760809E72A6F4C1F00B85990 /* AgoraVideoViewerWrapper.swift in Sources */,
 				765773C22A3BB7FB001FF6D7 /* CallView.swift in Sources */,
 				7657739E2A393E5D001FF6D7 /* MatchaApp.swift in Sources */,
 				76E7C2972A76349700A23064 /* ProfileViewModel.swift in Sources */,
+				76C620D92A9FD58D004FFCB5 /* ImagePicker.swift in Sources */,
 				76E7C2A12A85768B00A23064 /* AppDelegate.swift in Sources */,
 				765773BE2A3A5A59001FF6D7 /* RegistrationView.swift in Sources */,
 			);
@@ -362,6 +406,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Matcha/Matcha.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -371,8 +416,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Matcha/Info.plist;
-				INFOPLIST_KEY_NSCameraUsageDescription = "So people can see you‼️";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "So people can hear you‼️";
+				INFOPLIST_KEY_CFBundleDisplayName = Matcha;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Matcha uses your camera to enable video calls‼️";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Matcha uses your microphone to enable calls‼️";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -383,7 +430,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1.1;
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.chrisbeenchoi.Matcha;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -397,6 +445,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Matcha/Matcha.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -406,8 +455,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Matcha/Info.plist;
-				INFOPLIST_KEY_NSCameraUsageDescription = "So people can see you‼️";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "So people can hear you‼️";
+				INFOPLIST_KEY_CFBundleDisplayName = Matcha;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Matcha uses your camera to enable video calls‼️";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Matcha uses your microphone to enable calls‼️";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -418,7 +469,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1.1;
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.chrisbeenchoi.Matcha;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -475,6 +527,22 @@
 				kind = branch;
 			};
 		};
+		76C620DA2A9FDD41004FFCB5 /* XCRemoteSwiftPackageReference "TOCropViewController" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TimOliver/TOCropViewController.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		76C620EA2AAFAB3C004FFCB5 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -493,15 +561,25 @@
 			package = 765773AD2A394B45001FF6D7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseDatabase;
 		};
-		765D6BA82A91640200D472FF /* KeychainSwift */ = {
+		7671558F2AB0D82C00D2B803 /* GoogleMobileAds */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 765D6BA72A91640200D472FF /* XCRemoteSwiftPackageReference "keychain-swift" */;
-			productName = KeychainSwift;
+			package = 76C620EA2AAFAB3C004FFCB5 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
 		};
 		76B1B0852A478E6500AB103A /* AgoraUIKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 76B1B0842A478E6500AB103A /* XCRemoteSwiftPackageReference "VideoUIKit-iOS" */;
 			productName = AgoraUIKit;
+		};
+		76C620DB2A9FDD41004FFCB5 /* CropViewController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 76C620DA2A9FDD41004FFCB5 /* XCRemoteSwiftPackageReference "TOCropViewController" */;
+			productName = CropViewController;
+		};
+		76C620E02A9FE7B7004FFCB5 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 765773AD2A394B45001FF6D7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

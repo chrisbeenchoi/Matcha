@@ -13,10 +13,39 @@ struct ProfileView: View {
     @EnvironmentObject var contentViewModel: ContentViewModel
     @StateObject var profileViewModel = ProfileViewModel()
     @State var saved = false
+    @State private var isImagePickerPresented = false
     
     var body: some View {
         VStack {
-            // profile picture <-- add later if need be
+            if let profileImage = profileViewModel.profileImage {
+                Image(uiImage: profileImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 100, height: 100)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white, lineWidth: 4))
+                    .onChange(of: profileViewModel.profileImage) { _ in
+                        saved = false
+                    }
+            } else {
+                Image(systemName: "person.crop.circle")
+                    .resizable()
+                    .foregroundColor(.gray)
+                    .scaledToFit()
+                    .frame(width: 100, height: 100)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.white, lineWidth: 4))
+                    .onChange(of: profileViewModel.profileImage) { _ in
+                        saved = false
+                    }
+            }
+            
+            //adjust size?
+            Button("Select Profile Picture") {
+                isImagePickerPresented = true
+            }
+            
+            // adjust spacing. look at login controller and take what it's doing
             VStack(spacing: 15) {
                 HStack {
                     Text("First name:")
@@ -30,48 +59,60 @@ struct ProfileView: View {
                 }
                 .padding()
                 
-                //HStack {
-                //    Text("Bio:")
-                //    TextField("Enter a lil bio...", text: $profileViewModel.bio)
-                //        .textFieldStyle(RoundedBorderTextFieldStyle())
-                //        .autocapitalization(.none)
-                //        .disableAutocorrection(true)
-                //        .onChange(of: profileViewModel.bio) { _ in
-                //            saved = false
-                //        }
-                //}
-                //.padding()
-                //
-                //HStack {
-                //    Text("Instagram:")
-                //    TextField("Enter Instagram handle...", text: $profileViewModel.ig)
-                //        .textFieldStyle(RoundedBorderTextFieldStyle())
-                //        .autocapitalization(.none)
-                //        .disableAutocorrection(true)
-                //        .onChange(of: profileViewModel.ig) { _ in
-                //            saved = false
-                //        }
-                //}
-                //.padding()
-                //
-                //HStack {
-                //    Text("Snapchat:")
-                //    TextField("Enter Snapchat username...", text: $profileViewModel.snap)
-                //        .textFieldStyle(RoundedBorderTextFieldStyle())
-                //        .autocapitalization(.none)
-                //        .disableAutocorrection(true)
-                //        .onChange(of: profileViewModel.snap) { _ in
-                //            saved = false
-                //        }
-                //}
-                //.padding()
+                HStack {
+                    Text("Bio:")
+                    TextField("Enter a lil bio...", text: $profileViewModel.bio)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .onChange(of: profileViewModel.bio) { _ in
+                            saved = false
+                        }
+                }
+                .padding()
+                
+                HStack {
+                    Text("Instagram:")
+                    TextField("Enter Instagram handle...", text: $profileViewModel.ig)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .onChange(of: profileViewModel.ig) { _ in
+                            saved = false
+                        }
+                }
+                .padding()
+                
+                HStack {
+                    Text("Snapchat:")
+                    TextField("Enter Snapchat username...", text: $profileViewModel.snap)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .onChange(of: profileViewModel.snap) { _ in
+                            saved = false
+                        }
+                }
+                .padding()
                 
                 if (!saved) {
                     Button("Save Changes") {
                         profileViewModel.saveProfile(uid: contentViewModel.uid) { success in
                             if success {
                                 print("changes saved")
-                                saved = true
+                                // save image
+                                if let pfp = profileViewModel.profileImage {
+                                    DatabaseManager.shared.uploadPfp(uid: contentViewModel.uid, pfp: pfp) { success in
+                                        if success {
+                                            print("pfp saved")
+                                            saved = true
+                                        } else {
+                                            print("pfp NOT saved...!")
+                                        }
+                                    }
+                                } else {
+                                    saved = true
+                                }
                             } else {
                                 print("changes NOT saved...!")
                             }
@@ -120,40 +161,48 @@ struct ProfileView: View {
             }
             .padding()
         }
+        .sheet(isPresented: $isImagePickerPresented) {
+            ImagePicker(image: $profileViewModel.profileImage)
+        }
         .onAppear() {
             profileViewModel.fetchProfile(uid: contentViewModel.uid)
         }
         .alert(item: $profileViewModel.alertItem) { alertItem in
-            Alert(title: Text(alertItem.title),
-                  message: Text(alertItem.message),
-                  primaryButton: .cancel(Text("NO")),
-                  secondaryButton: .destructive(Text("Delete..."), action: deleteProfile)
-            )
+            if (alertItem.title == "REALLY⁉️") {
+                return Alert(title: Text(alertItem.title),
+                      message: Text(alertItem.message),
+                      primaryButton: .cancel(Text("NO")),
+                      secondaryButton: .destructive(Text("Delete..."), action: deleteProfile)
+                )
+            } else {
+                return Alert(title: Text(alertItem.title), message: Text(alertItem.message), dismissButton: .cancel(Text("Ok")))
+            }
         }
     }
     
     func deleteProfile() {
         if let user = Auth.auth().currentUser {
-            user.delete { error in
-                if let error = error {
-                    print("Error deleting user account: \(error.localizedDescription)")
+            DatabaseManager.shared.deleteUser(uid: contentViewModel.uid) { success in
+                if success {
+                    print("USER DATA DELETED")
+                    user.delete { error in
+                        if let error = error {
+                            print("Error deleting user account: \(error.localizedDescription)")
+                            profileViewModel.failedDelete()
+                        } else {
+                            print("User account deleted successfully.")
+                            contentViewModel.signOut()
+                            contentViewModel.loggedIn = false
+                            contentViewModel.loggingIn = false
+                            contentViewModel.registering = false
+                            contentViewModel.uid = ""
+                        }
+                    }
                 } else {
-                    print("User account deleted successfully.")
+                    print("USER DATA NOT DELETED UH OH!")
                 }
             }
         }
-        DatabaseManager.shared.deleteUser(uid: contentViewModel.uid) { success in
-            if success {
-                print("USER DATA DELETED")
-            } else {
-                print("USER DATA NOT DELETED UH OH!")
-            }
-        }
-        contentViewModel.signOut()
-        contentViewModel.loggedIn = false
-        contentViewModel.loggingIn = false
-        contentViewModel.registering = false
-        contentViewModel.uid = ""
     }
 }
 

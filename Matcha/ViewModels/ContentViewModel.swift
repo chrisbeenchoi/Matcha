@@ -11,9 +11,17 @@ import Firebase
 
 class ContentViewModel: ObservableObject {
     @Published var registering: Bool = false
+    @Published var profiling: Bool = false
     @Published var loggingIn: Bool = false
     @Published var loggedIn: Bool = false
+    @Published var homeOverride: Bool = false
     @Published var uid: String = ""
+    
+    @Published var postCall: Bool = false
+    @Published var adClicked: Bool = false
+    @Published var rewardAd: AdCoordinator = AdCoordinator()
+    
+    @Published var reporting: Bool = false
     
     // default in past, to not trigger anything.
     @Published var callTime: Date = Calendar.current.date(byAdding: .day, value: -7, to: Date())!

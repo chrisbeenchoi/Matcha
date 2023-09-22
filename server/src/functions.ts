@@ -28,47 +28,47 @@ const db = admin.database();
 // - random call time set
 // - notifications scheduled
 // - matching scheduled
-export async function setCallTime() {
+export async function setCallTime(rn: boolean) {
   // 0. clear matchpool of potential leftovers
   const pool = db.ref('matchPool');
   pool.remove();
 
-  // 1. check if calltime currently exists + is valid. otherwise set a valid call time 
-  const callTimeRef = db.ref('callTime')
-
-  let set: boolean = false; //whether we chillin rn or nah
-
-  //initialize as invalid, will be overwritten
   let callTime: Date = new Date(); 
-  callTime.setDate(callTime.getDate()-1);
 
-  await callTimeRef.once('value', (snapshot) => {
-    const callTimeValue = snapshot.val();
-    console.log('callTime value fetched:', callTimeValue);
-    if (callTimeValue != null) {
-      callTime = parse(callTimeValue, 'yyyy-MM-dd HH:mm:ss', new Date());
-    }
+  const callTimeRef = db.ref('callTime')
+  let set: boolean = false; //whether we chillin rn or nah
+  if (!rn) {
+    // 1. check if calltime currently exists + is valid. otherwise set a valid call time 
+    // initialize as invalid, will be overwritten
+    callTime.setDate(callTime.getDate()-1);
 
-    const lastMidnight = new Date();
-    lastMidnight.setHours(0);
-    lastMidnight.setMinutes(0);
+    await callTimeRef.once('value', (snapshot) => {
+      const callTimeValue = snapshot.val();
+      console.log('callTime value fetched:', callTimeValue);
+      if (callTimeValue != null) {
+        callTime = parse(callTimeValue, 'yyyy-MM-dd HH:mm:ss', new Date());
+      }
 
-    const nextMidnight = new Date();
-    nextMidnight.setDate(nextMidnight.getDate()+1);
-    nextMidnight.setHours(0);
-    nextMidnight.setMinutes(0);
+      const lastMidnight = new Date();
+      lastMidnight.setHours(0);
+      lastMidnight.setMinutes(0);
 
-    console.log("calltime", callTime)
-    console.log("next midnight", nextMidnight)
+      const nextMidnight = new Date();
+      nextMidnight.setDate(nextMidnight.getDate()+1);
+      nextMidnight.setHours(0);
+      nextMidnight.setMinutes(0);
 
-    if (callTime > lastMidnight && callTime < nextMidnight) set = true;
-    else {
-      set = false;
-      callTime = getRandomTime();
-    }
+      console.log("calltime", callTime)
+      console.log("next midnight", nextMidnight)
 
-    console.log("set", set);
-  });
+      if (callTime > lastMidnight && callTime < nextMidnight) set = true;
+      else {
+        set = false;
+        callTime = getRandomTime();
+      }
+      console.log("set", set);
+    });
+  }
 
   if (set) {
     console.log("CALL TIME WAS VALID TO BEGIN WITH")
@@ -78,6 +78,7 @@ export async function setCallTime() {
     }
     // if today's call is yet to happen fill in everyone's info
   } 
+
   callTimeRef.set(format(callTime, 'yyyy-MM-dd HH:mm:ss'));
 
   // 2. if value set start counter + group users in groups of like, 100? less?
@@ -193,44 +194,64 @@ export async function matchUsers() {
       }
     });
 
+    uids = shuffleArray(uids);
+
+    const users = db.ref('users');
+
     // test with more than 2 users, odd number of users, users joining while function running
     for (let i = 0; i < uids.length; i += 2) {
-      // implement randomization - soon? necessary?
       let uid1 = uids.pop();
       let uid2 = uids.pop();
       if (uid1 == null || uid2 == null) return;
-
-      const users = db.ref('users');
-
-      // use this as unique channel name
-      const matchid = uid1+uid2 // right at 64 byte limit
       
-      // request tokens from server --> update user nodes
-      let url1 = 'http://44.224.156.71:8080/rtc/' + matchid + '/1';
-      let url2 = 'http://44.224.156.71:8080/rtc/' + matchid + '/2';
+      const blockRef1 = users.child(uid1).child("blocked").child(uid2);
+      const blockRef2 = users.child(uid2).child("blocked").child(uid1);
+      
+      const blocked1 = await blockRef1.once('value');
+      const blocked2 = await blockRef2.once('value');
 
-      try {
-        const response = await axios.get(url1);
-        const token = response.data.rtcToken;
-        console.log('Token 1 received:', token);
-        users.child(uid1).child("matchInfo").set({ match: uid2, channel: matchid, token: token, channelUid: 1 })
-      } catch (error) {
-        console.error('Error fetching token 1:', error);
+      let blocked: boolean = blocked1.exists() || blocked2.exists();
+
+      if (!blocked) {
+        // use this as unique channel name
+        const matchid = uid1+uid2 // right at 64 byte limit
+      
+        // request tokens from server --> update user nodes
+        let url1 = 'http://44.224.156.71:8080/rtc/' + matchid + '/1';
+        let url2 = 'http://44.224.156.71:8080/rtc/' + matchid + '/2';
+
+        try {
+          const response = await axios.get(url1);
+          const token = response.data.rtcToken;
+          console.log('Token 1 received:', token);
+          users.child(uid1).child("matchInfo").set({ match: uid2, channel: matchid, token: token, channelUid: 1 })
+        } catch (error) {
+          console.error('Error fetching token 1:', error);
+        }
+
+        try {
+          const response = await axios.get(url2);
+          const token = response.data.rtcToken;
+          console.log('Token 2 received:', token);
+          users.child(uid2).child("matchInfo").set({ match: uid1, channel: matchid, token: token, channelUid: 2 })
+        } catch (error) {
+          console.error('Error fetching token 2:', error);
+        }
+
+        pool.child(uid1).remove();
+        pool.child(uid2).remove();
       }
-
-      try {
-        const response = await axios.get(url2);
-        const token = response.data.rtcToken;
-        console.log('Token 2 received:', token);
-        users.child(uid2).child("matchInfo").set({ match: uid1, channel: matchid, token: token, channelUid: 2 })
-      } catch (error) {
-        console.error('Error fetching token 2:', error);
-      }
-
-      pool.child(uid1).remove();
-      pool.child(uid2).remove();
     }
   } catch (error) {
     console.log(error);
   }
+}
+
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffledArray = [...array];
+  for (let i = shuffledArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+  }
+  return shuffledArray;
 }
