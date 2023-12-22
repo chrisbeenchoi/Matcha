@@ -6,6 +6,7 @@ import cron from 'node-cron';
 
 dotenv.config();
 const port = 8080;  //default http value
+//const port = 43;
 
 // set call time when server starts + daily at midnight
 setCallTime(false);

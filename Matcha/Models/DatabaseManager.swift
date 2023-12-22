@@ -47,8 +47,8 @@ class DatabaseManager {
         let userRef = database.child("users").child(uid)
         let userData = [
             "firstName": "",
-            "callTime": nil  //TODO: keep a value in database to fetch at initialization so user can use starting on first day. track # of people in latest group, increment as needed
-            // Do this fast. this is essential to the user experience.
+            "callTime": nil,
+            "profileStatus": "0"
         ]
         
         userRef.setValue(userData) { (error, databaseRef) in
@@ -120,12 +120,10 @@ class DatabaseManager {
     }
     
     // PROFILE METHODS:
-    // write profile to database, all info under profile node. NEEDS first name
     func setProfile(uid: String, firstName: String, bio: String?, ig: String?, snap: String?, phoneNumber: String?, completion: @escaping (Bool) -> Void) {
         let userRef = database.child("users").child(uid)
         let profileRef = userRef.child("profile")
         
-        // unsure how well this will work with the nil values but let us just try..
         let profileData = [
             "firstName": firstName,
             "bio": bio,
@@ -338,6 +336,32 @@ class DatabaseManager {
                 completion(true)
             }
         }
+    }
+    
+    func getProfileStatus(uid: String, completion: @escaping (Bool) -> Void) {
+        let profileStatus = database.child("users").child(uid).child("profileStatus")
+        profileStatus.observeSingleEvent(of: .value) { snapshot in
+            if let status = snapshot.value as? String {
+                print("done? (0 for false, 1 for true): \(status)")
+                completion(status == "1")
+            } else {
+                completion(true)
+            }
+        }
+    }
+    
+    func setProfileStatus(uid: String, completion: @escaping (Bool) -> Void) {
+        let profileStatus = database.child("users").child(uid)
+        profileStatus.updateChildValues(["profileStatus": "1"]) { (error, databaseRef) in
+            if let error = error {
+                print("Error writing to database: \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("User profile status set successfully")
+                completion(true)
+            }
+        }
+        
     }
     
     func deleteUser(uid: String, completion: @escaping (Bool) -> Void) {

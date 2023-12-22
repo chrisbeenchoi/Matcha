@@ -69,12 +69,16 @@ struct ProfileCreationView: View {
                 profileCreationViewModel.createProfile(uid: contentViewModel.uid) { success in
                     if success {
                         print("profile created")
+                        DatabaseManager.shared.setProfileStatus(uid: contentViewModel.uid) { success in
+                            if success {
+                                contentViewModel.profiling = false
+                                contentViewModel.loggedIn = true
+                            }
+                        }
                         if let pfp = profileCreationViewModel.profileImage {
                             DatabaseManager.shared.uploadPfp(uid: contentViewModel.uid, pfp: pfp) { success in 
                                 if success {
                                     print("pfp initialized")
-                                    contentViewModel.profiling = false
-                                    contentViewModel.loggedIn = true
                                 } else {
                                     print("pfp NOT initialized")
                                 }

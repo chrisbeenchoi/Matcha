@@ -9,6 +9,7 @@ import SwiftUI
 
 // Top level view for app
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject var contentViewModel: ContentViewModel = ContentViewModel() //top level instance. need to pass this in other into everywhere that affects app directory
     @State var currTime: Date = Date() //move into contentviewmodel?
     @State var home: Bool = true
@@ -21,12 +22,22 @@ struct ContentView: View {
         if contentViewModel.loggedIn {
             ZStack {
                 // content: home or profile
-                if (home && !profile) {
+                if contentViewModel.profiling {
+                    ProfileCreationView()
+                        .environmentObject(contentViewModel)
+                } else if (home && !profile) {
                     if (contentViewModel.homeOverride) {
                         AppHomeView().environmentObject(contentViewModel)
                             .onAppear {
                                 startTimer()
                                 contentViewModel.updateCallTime()
+                                DatabaseManager.shared.getProfileStatus(uid: contentViewModel.uid) { done in
+                                    if !done {
+                                        contentViewModel.profiling = true
+                                    } else {
+                                        contentViewModel.profiling = false
+                                    }
+                                }
                             }
                     } else if (contentViewModel.reporting) {
                         ReportView().environmentObject(contentViewModel)
@@ -51,6 +62,11 @@ struct ContentView: View {
                             .onAppear {
                                 startTimer()
                                 contentViewModel.updateCallTime()
+                                DatabaseManager.shared.getProfileStatus(uid: contentViewModel.uid) { done in
+                                    if !done {
+                                        contentViewModel.profiling = true
+                                    }
+                                }
                             }
                     }
                 } else {
@@ -92,9 +108,12 @@ struct ContentView: View {
                     }
                 }
             }
-            //.sheet(isPresented: $postCall) {
-            //    PostCallAlert(matchUid: "", isPresented: $postCall)
-            //}
+            .onChange(of: scenePhase) { newScenePhase in
+                if newScenePhase == .active {
+                    contentViewModel.updateCallTime()
+                    print("App entered the foreground")
+                }
+            }
         } else {
             // not logged in.
             if contentViewModel.loggingIn {
@@ -135,7 +154,7 @@ struct ContentView: View {
                     
                     RegistrationView().environmentObject(contentViewModel)
                 }
-            } else if contentViewModel.profiling { //TODO: store profiling status somewhere (keychain? database? top level? to pop this up anytime it's not done
+            } else if contentViewModel.profiling {
                 ProfileCreationView()
                     .environmentObject(contentViewModel)
             } else {
@@ -164,8 +183,9 @@ struct ContentView: View {
                 postCallTriggered = true
             }
             
-            // put a condition on this?
-            contentViewModel.updateCallTime()
+            // restore this with any issues
+            //contentViewModel.updateCallTime()
+            
             if (!tokenSet) {
                 if (globalDeviceToken != "") {
                     DatabaseManager.shared.setDeviceToken(uid: contentViewModel.uid) { success in
