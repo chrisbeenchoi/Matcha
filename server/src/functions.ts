@@ -176,6 +176,77 @@ export function getRandomTime() {
   return callTime;
 }
 
+export async function matchUsers_FT() {
+  const pool = db.ref('matchPool');
+
+  // save all users into an array 
+  let uids: string[] = [];
+
+  try {
+    const snapshot = await pool.once('value');
+
+    snapshot.forEach((childSnapshot) => {
+      var key = childSnapshot.key;
+      if (key != null) {
+        uids.push(key);
+      }
+    });
+
+    uids = shuffleArray(uids);
+
+    const users = db.ref('users');
+
+    // test with more than 2 users, odd number of users, users joining while function running
+    for (let i = 0; i < uids.length; i += 2) {
+      let uid1 = uids.pop();
+      let uid2 = uids.pop();
+      if (uid1 == null || uid2 == null) return;
+      
+      const blockRef1 = users.child(uid1).child("blocked").child(uid2);
+      const blockRef2 = users.child(uid2).child("blocked").child(uid1);
+      
+      const blocked1 = await blockRef1.once('value');
+      const blocked2 = await blockRef2.once('value');
+
+      let blocked: boolean = blocked1.exists() || blocked2.exists();
+
+      if (!blocked) {
+        // use this as unique channel name
+        const matchid = uid1+uid2 // right at 64 byte limit
+
+        // get phone number fields from both users
+        
+        const ftlink = "facetime" + "" + "?user2=" + ""
+      
+        
+
+        try {
+          const response = await axios.get(url1);
+          const token = response.data.rtcToken;
+          console.log('Token 1 received:', token);
+          users.child(uid1).child("matchInfo").set({ match: uid2, channel: matchid, token: token, channelUid: 1 })
+        } catch (error) {
+          console.error('Error fetching token 1:', error);
+        }
+
+        try {
+          const response = await axios.get(url2);
+          const token = response.data.rtcToken;
+          console.log('Token 2 received:', token);
+          users.child(uid2).child("matchInfo").set({ match: uid1, channel: matchid, token: token, channelUid: 2 })
+        } catch (error) {
+          console.error('Error fetching token 2:', error);
+        }
+
+        pool.child(uid1).remove();
+        pool.child(uid2).remove();
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 // this function runs every second during active window
 // pairs up users and takes them out of pool once matched successfully
 export async function matchUsers() {

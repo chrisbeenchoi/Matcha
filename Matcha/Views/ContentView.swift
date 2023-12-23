@@ -48,7 +48,8 @@ struct ContentView: View {
                                 startTimer()
                                 contentViewModel.updateCallTime()
                             }
-                    } else if (contentViewModel.postCall && (contentViewModel.adClicked ||
+                    } // this is not quite working correctly. i believe there is a variable that needs to be tracked to reload this little window  - currently not 
+                    else if (contentViewModel.postCall && (contentViewModel.adClicked ||
                                (currTime >= contentViewModel.callTime.addingTimeInterval(2 * 60) &&
                                 currTime <= contentViewModel.callTime.addingTimeInterval(2 * 60 + 15)))) {
                         PostCallView().environmentObject(contentViewModel)
@@ -184,7 +185,7 @@ struct ContentView: View {
             }
             
             // restore this with any issues
-            //contentViewModel.updateCallTime()
+            contentViewModel.updateCallTime()
             
             if (!tokenSet) {
                 if (globalDeviceToken != "") {

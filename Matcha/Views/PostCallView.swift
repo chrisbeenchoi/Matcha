@@ -18,9 +18,35 @@ struct PostCallView: View {
     
     @State var rewarded: Bool = false
     
+    @State var status: String? = nil
+    
     @State var ig: String = ""
     @State var snap: String = ""
     @State var phoneNumber: String = ""
+    
+    func fetchStatus() {
+        DatabaseManager.shared.getMatchStatus(uid: matchUid) { ms in
+            if let ms = ms {
+                self.status = ms
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.00) {
+                    fetchStatus()
+                }
+            }
+        }
+    }
+    
+    func writeStatus(yn: String) {
+        DatabaseManager.shared.setMatchStatus(uid: contentViewModel.uid, status: yn) { done in
+            if done {
+                print("status set")
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                    writeStatus(yn: yn)
+                }
+            }
+        }
+    }
     
     // make a timer
     // this will be very similar to callview.
@@ -71,6 +97,8 @@ struct PostCallView: View {
                     
                     // buttons - iconize, layout later
                     Button("🎥 Keep in touch with \(firstName)") {
+                        writeStatus(yn: "y")
+                        
                         contentViewModel.adClicked = true
                         
                         contentViewModel.rewardAd.presentAd(rewardFunction: {
@@ -87,6 +115,7 @@ struct PostCallView: View {
                     .cornerRadius(10)
                     
                     Button("Nah") {
+                        writeStatus(yn: "n")
                         contentViewModel.postCall = false
                     }
                     .padding()
@@ -96,47 +125,63 @@ struct PostCallView: View {
                     
                 }
             } else {
-                VStack {
-                    if let pfp = self.pfp {
-                        Image(uiImage: pfp)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white, lineWidth: 4))
-                    } else {
-                        Image(systemName: "person.crop.circle")
-                            .resizable()
-                            .foregroundColor(.gray)
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.white, lineWidth: 4))
-                    }
-                    
-                    //need small padding between these, if any.
-                    if (ig != "") {
-                        Text("IG: @\(ig)")
-                    }
-                    
-                    if (snap != "") {
-                        Text("SNAP: @\(snap)")
-                    }
+                if status == "y" {
+                    VStack {
+                        if let pfp = self.pfp {
+                            Image(uiImage: pfp)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.white, lineWidth: 4))
+                        } else {
+                            Image(systemName: "person.crop.circle")
+                                .resizable()
+                                .foregroundColor(.gray)
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.white, lineWidth: 4))
+                        }
                         
-                    if (phoneNumber != "") {
-                        Text("DIGITS: \(phoneNumber)")
+                        //need small padding between these, if any.
+                        if (ig != "") {
+                            Text("IG: @\(ig)")
+                        }
+                        
+                        if (snap != "") {
+                            Text("SNAP: @\(snap)")
+                        }
+                            
+                        if (phoneNumber != "") {
+                            Text("DIGITS: \(phoneNumber)")
+                        }
+                        
+                        Button("Got it.") {
+                            contentViewModel.postCall = false
+                        }
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(Color("matcha"))
+                        .cornerRadius(10)
+                        
                     }
-                    
-                    Button("Got it.") {
-                        contentViewModel.postCall = false
+                } else if status == "n" {
+                    VStack {
+                        Text("Sorry champ. \(firstName) declined to stay in touch 😔")
+                        Button("DAMN.") {
+                            contentViewModel.postCall = false
+                        }
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(Color("matcha"))
+                        .cornerRadius(10)
                     }
-                    .padding()
-                    .foregroundColor(.white)
-                    .background(Color("matcha"))
-                    .cornerRadius(10)
-                    
+                } else {
+                    VStack {
+                        Text("Waiting on \(firstName) to make a decision...")
+                    }
                 }
-                
             }
             
         
@@ -186,8 +231,9 @@ struct PostCallView: View {
                             self.phoneNumber = digits
                         }
                     }
+                    fetchStatus()
                 } else {
-                    print("Fetch fuckin failed")
+                    print("Fetch failed")
                 }
             }
         }

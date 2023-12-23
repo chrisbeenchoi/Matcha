@@ -254,6 +254,48 @@ class DatabaseManager {
         }
     }
     
+    // whether user wants to exchange contact info (y/n)
+    func setMatchStatus(uid: String, status: String, completion: @escaping (Bool) -> Void) {
+        let statusRef = database.child("users").child(uid).child("matchInfo").child("status")
+        statusRef.setValue(status) { (error, databaseRef) in
+            if let error = error {
+                print("Error writing to database: \(error.localizedDescription)")
+                completion(false)
+            } else {
+                print("Status set. User wants to exchange contact info: ", status)
+                completion(true)
+            }
+        }
+    }
+    
+    // read whether other user wants to exchange contact info (y/n)
+    func getMatchStatus(uid: String, completion: @escaping (String?) -> Void) {
+        let statusRef = database.child("users").child(uid).child("matchInfo").child("status")
+        statusRef.observeSingleEvent(of: .value) { snapshot in
+            if let status = snapshot.value as? String {
+                print("Other user wants to exchange contact info: \(status)")
+                completion(status)
+            } else {
+                print("IDK YET IF THEY WANT TO TRADE INFO...!")
+                completion(nil)
+            }
+        }
+    }
+    
+    // not used yet
+    func getFtLink(uid: String, completion: @escaping (String?) -> Void) {
+        let linkRef = database.child("users").child(uid).child("matchInfo").child("ftLink")
+        linkRef.observeSingleEvent(of: .value) { snapshot in
+            if let link = snapshot.value as? String {
+                print("facetime link: \(link)")
+                completion(link)
+            } else {
+                print("NO FT LINK YET...!")
+                completion(nil)
+            }
+        }
+    }
+    
     func blockUser(blocker: String, blocked: String, completion: @escaping (Bool) -> Void) {
         let blockListRef = database.child("users").child(blocker).child("blocked").child(blocked)
         blockListRef.setValue(blocked) { (error, databaseRef) in
